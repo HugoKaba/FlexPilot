@@ -6,6 +6,17 @@ SaaS de pilotage delivery orienté exécution (Backlog, Board, Sprint, Roadmap, 
 
 https://archi-front.web.app
 
+## Screenshots Démo
+
+![Auth](docs/screenshots/01-auth.png)
+![Dashboard](docs/screenshots/02-dashboard.png)
+![Backlog](docs/screenshots/03-backlog.png)
+![Board](docs/screenshots/04-board.png)
+![Sprints](docs/screenshots/05-sprints.png)
+![Settings](docs/screenshots/06-settings.png)
+![Billing](docs/screenshots/07-billing.png)
+![Integrations](docs/screenshots/08-integrations.png)
+
 ## Stack et justifications
 
 - **Vite + React + TypeScript strict**: setup rapide, DX excellente, pertinent pour un SaaS SPA.
