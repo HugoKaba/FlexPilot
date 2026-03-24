@@ -1,0 +1,7 @@
+export { AutomationRulesPanel } from './automation-rules-panel'
+export { DevopsIntegrationsPanel } from './devops-integrations-panel'
+export { GovernancePanel } from './governance-panel'
+export { PortfolioStudioPanel } from './portfolio-studio-panel'
+export { ReportBuilderPanel } from './report-builder-panel'
+export { TeamStructurePanel } from './team-structure-panel'
+export { WorkflowStudioPanel } from './workflow-studio-panel'

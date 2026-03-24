@@ -1,0 +1,45 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /projects/{projectId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    match /workItems/{itemId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    match /sprints/{sprintId} {
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /invitations/{invitationId} {
+      allow create: if request.auth != null
+        && request.auth.uid == request.resource.data.ownerUserId
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.subscriptionStatus == 'active';
+
+      allow read: if request.auth != null
+        && (
+          request.auth.uid == resource.data.ownerUserId
+          || request.auth.token.email == resource.data.inviteeEmail
+        );
+
+      allow update: if request.auth != null
+        && (
+          request.auth.uid == resource.data.ownerUserId
+          || (
+            request.auth.token.email == resource.data.inviteeEmail
+            && request.resource.data.status == 'accepted'
+            && request.resource.data.acceptedByUserId == request.auth.uid
+          )
+        );
+    }
+  }
+}
