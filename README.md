@@ -87,6 +87,54 @@ npm run dev
 npm run test
 ```
 
+## CI + Auto Deploy (GitHub Actions)
+
+Le repo inclut maintenant 2 workflows:
+
+- `.github/workflows/ci.yml`: lint + tests + build sur chaque `push` et `pull_request`
+- `.github/workflows/deploy.yml`: auto-déploiement Firebase après succès de CI sur la branche `main`
+
+### Secrets GitHub requis
+
+Dans `GitHub > Settings > Secrets and variables > Actions`, créer ces secrets:
+
+- `FIREBASE_SERVICE_ACCOUNT_ARCHI_FRONT` (JSON complet de la clé service account Firebase)
+- `VITE_FIREBASE_API_KEY`
+- `VITE_FIREBASE_AUTH_DOMAIN`
+- `VITE_FIREBASE_PROJECT_ID`
+- `VITE_FIREBASE_STORAGE_BUCKET`
+- `VITE_FIREBASE_MESSAGING_SENDER_ID`
+- `VITE_FIREBASE_APP_ID`
+- `VITE_STRIPE_PUBLISHABLE_KEY`
+- `VITE_STRIPE_API_BASE_URL` (valeur: `/api/stripe`)
+- `VITE_GITHUB_CLIENT_ID`
+- `STRIPE_SECRET_KEY`
+- `STRIPE_PRICE_ID`
+- `APP_BASE_URL` (valeur prod: `https://archi-front.web.app`)
+- `GITHUB_CLIENT_SECRET`
+
+### Générer la clé `FIREBASE_SERVICE_ACCOUNT_ARCHI_FRONT`
+
+1. Ouvrir Firebase Console > `Project settings` > `Service accounts`
+2. Cliquer `Generate new private key`
+3. Copier le contenu JSON complet
+4. Coller ce JSON brut dans le secret GitHub `FIREBASE_SERVICE_ACCOUNT_ARCHI_FRONT`
+
+### Flux CI/CD
+
+1. Push sur une branche: CI exécute `npm ci`, `npm run lint`, `npm run test -- --run`, `npm run build`
+2. Merge/push sur `main`
+3. Si CI est verte, le workflow `Deploy Firebase` publie automatiquement:
+   - Hosting
+   - Functions
+   - Firestore rules
+   - Firestore indexes
+
+### Vérification rapide
+
+- Onglet `Actions` sur GitHub: vérifier `CI` puis `Deploy Firebase` en vert
+- URL prod: [https://archi-front.web.app](https://archi-front.web.app)
+
 ## Configuration Firebase
 
 ### 1) Créer le projet Firebase

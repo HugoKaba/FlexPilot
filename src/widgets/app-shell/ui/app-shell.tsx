@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, type ReactNode } from 'react'
 import { Link, NavLink, useLocation } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
 import { LanguageToggle } from '@/features/language-toggle'
@@ -23,7 +23,6 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
   const setSubscriptionStatus = usePreferencesStore((state) => state.setSubscriptionStatus)
   const setSubscriptionPlan = usePreferencesStore((state) => state.setSubscriptionPlan)
   const location = useLocation()
-  const [showPaywall, setShowPaywall] = useState(false)
 
   const checkoutStatus = useMemo(() => {
     const params = new URLSearchParams(location.search)
@@ -69,19 +68,10 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
     }
   }, [checkoutStatus.checkout, checkoutStatus.plan, checkoutStatus.sessionId, setSubscriptionPlan, setSubscriptionStatus, user?.uid, verifySessionQuery.data, verifySessionQuery.isError, writeSubscriptionMutation])
 
-  useEffect(() => {
-    if (location.pathname === '/billing') {
-      setShowPaywall(false)
-      return
-    }
-
-    if (subscriptionStatus !== 'active') {
-      setShowPaywall(true)
-      return
-    }
-
-    setShowPaywall(false)
-  }, [location.pathname, subscriptionStatus])
+  const showPaywall = useMemo(
+    () => location.pathname !== '/billing' && subscriptionStatus !== 'active',
+    [location.pathname, subscriptionStatus],
+  )
 
   const sectionTitle = useMemo(() => {
     if (location.pathname.startsWith('/dashboard') || location.pathname === '/') return t('dashboard')
@@ -174,7 +164,6 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         onActivateSubscription={() => {
           setSubscriptionPlan('pro')
           setSubscriptionStatus('active')
-          setShowPaywall(false)
           if (user?.uid) {
             void writeSubscriptionMutation.mutateAsync({
               plan: 'pro',

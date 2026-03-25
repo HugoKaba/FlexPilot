@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
-import { useWorkItemQuery, useWorkItemsQuery } from '@/entities/work-item'
+import { useWorkItemQuery, useWorkItemsQuery, type WorkItem } from '@/entities/work-item'
 import { WorkItemForm, useDeleteWorkItemMutation, useUpdateWorkItemMutation } from '@/features/work-item-crud'
 import { useAuth } from '@/features/auth'
 import { getFirebaseErrorMessage } from '@/shared/lib'
@@ -11,22 +11,16 @@ export const WorkItemPage = () => {
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
   const navigate = useNavigate()
-  const [editing, setEditing] = useState(false)
+  const [editing, setEditing] = useState(() => searchParams.get('edit') === '1')
 
   const itemQuery = useWorkItemQuery(user?.uid, itemId)
   const allItemsQuery = useWorkItemsQuery(user?.uid)
   const updateMutation = useUpdateWorkItemMutation(user?.uid ?? '', itemId ?? '')
   const deleteMutation = useDeleteWorkItemMutation(user?.uid ?? '')
 
-  useEffect(() => {
-    if (searchParams.get('edit') === '1') {
-      setEditing(true)
-    }
-  }, [searchParams])
-
   const related = useMemo(() => {
     if (!itemQuery.data || !allItemsQuery.data) {
-      return { parent: null, children: [] as typeof allItemsQuery.data }
+      return { parent: null, children: [] as WorkItem[] }
     }
 
     return {

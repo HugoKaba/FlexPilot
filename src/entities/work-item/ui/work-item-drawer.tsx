@@ -18,44 +18,38 @@ export const WorkItemDrawer = ({
   onClose: () => void
   onSave?: (itemId: string, payload: WorkItemPayload) => Promise<void>
 }) => {
-  if (!item) {
-    return null
-  }
+  const buildFormState = (value: WorkItem | null): WorkItemPayload => ({
+    title: value?.title ?? '',
+    description: value?.description ?? '',
+    type: value?.type ?? 'task',
+    status: value?.status ?? 'todo',
+    priority: value?.priority ?? 'medium',
+    estimate: value?.estimate ?? 0,
+    assignee: value?.assignee ?? '',
+    labels: value?.labels ?? [],
+    sprintId: value?.sprintId ?? null,
+    parentId: value?.parentId ?? null,
+  })
 
   const [tab, setTab] = useState<'details' | 'edit' | 'activity'>('details')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [formState, setFormState] = useState<WorkItemPayload>({
-    title: item.title,
-    description: item.description,
-    type: item.type,
-    status: item.status,
-    priority: item.priority,
-    estimate: item.estimate,
-    assignee: item.assignee,
-    labels: item.labels,
-    sprintId: item.sprintId,
-    parentId: item.parentId,
-  })
-  const [labelsText, setLabelsText] = useState(item.labels.join(', '))
+  const [formState, setFormState] = useState<WorkItemPayload>(() => buildFormState(item))
+  const [labelsText, setLabelsText] = useState(() => item?.labels.join(', ') ?? '')
 
   useEffect(() => {
+    if (!item) {
+      return
+    }
     setTab('details')
     setError(null)
-    setFormState({
-      title: item.title,
-      description: item.description,
-      type: item.type,
-      status: item.status,
-      priority: item.priority,
-      estimate: item.estimate,
-      assignee: item.assignee,
-      labels: item.labels,
-      sprintId: item.sprintId,
-      parentId: item.parentId,
-    })
+    setFormState(buildFormState(item))
     setLabelsText(item.labels.join(', '))
   }, [item])
+
+  if (!item) {
+    return null
+  }
 
   return (
     <aside className="item-drawer-overlay" onClick={onClose}>

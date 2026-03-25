@@ -29,15 +29,18 @@ export const DevopsIntegrationsPanel = () => {
       state: params.get('state') ?? '',
     }
   }, [location.search])
+  const oauthStateError =
+    oauthParams.code && oauthParams.state && user?.uid
+      ? (sessionStorage.getItem('github_oauth_state') ?? '') !== oauthParams.state
+        ? 'Etat OAuth invalide. Recommence la connexion GitHub.'
+        : null
+      : null
 
   useEffect(() => {
     if (!oauthParams.code || !oauthParams.state || !user?.uid) {
       return
     }
-
-    const savedState = sessionStorage.getItem('github_oauth_state') ?? ''
-    if (savedState !== oauthParams.state) {
-      setConnectError('Etat OAuth invalide. Recommence la connexion GitHub.')
+    if (oauthStateError) {
       return
     }
 
@@ -52,7 +55,7 @@ export const DevopsIntegrationsPanel = () => {
       .catch(() => {
         setConnectError('Connexion GitHub échouée.')
       })
-  }, [exchangeMutation, navigate, oauthParams.code, oauthParams.state, user?.uid])
+  }, [exchangeMutation, navigate, oauthParams.code, oauthParams.state, oauthStateError, user?.uid])
 
   const startConnect = () => {
     try {
@@ -106,7 +109,7 @@ export const DevopsIntegrationsPanel = () => {
             )}
           </div>
         </div>
-        {connectError ? <p className="error">{connectError}</p> : null}
+        {oauthStateError ?? connectError ? <p className="error">{oauthStateError ?? connectError}</p> : null}
       </article>
 
       {statusQuery.data?.connected ? (

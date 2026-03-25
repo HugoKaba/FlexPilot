@@ -51,7 +51,7 @@ type PreferencesPersistedState = Pick<
 >
 
 const memoryStorage = (): StateStorage => {
-  let storage = new Map<string, string>()
+  const storage = new Map<string, string>()
 
   return {
     getItem: (name) => storage.get(name) ?? null,

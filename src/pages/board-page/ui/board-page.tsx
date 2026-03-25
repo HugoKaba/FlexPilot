@@ -28,23 +28,6 @@ export const BoardPage = () => {
   const [typeFilter, setTypeFilter] = useState<'all' | WorkItemType>('all')
   const boardData = boardQuery.data ?? emptyBoardData
 
-  const matchesFilters = (item: WorkItem, term: string, isSearchActive: boolean) => {
-    if (assigneeFilter !== 'all' && item.assignee !== assigneeFilter) {
-      return false
-    }
-    if (typeFilter !== 'all' && item.type !== typeFilter) {
-      return false
-    }
-    if (!isSearchActive) {
-      return true
-    }
-    return (
-      item.title.toLowerCase().includes(term) ||
-      item.description.toLowerCase().includes(term) ||
-      item.labels.some((label) => label.toLowerCase().includes(term))
-    )
-  }
-
   const assignees = useMemo(() => {
     const values = Object.values(boardData)
       .flat()
@@ -55,11 +38,27 @@ export const BoardPage = () => {
   const filteredData = useMemo<Record<WorkItemStatus, WorkItem[]>>(() => {
     const term = search.trim().toLowerCase()
     const isSearchActive = term.length > 0
+    const matchesFilters = (item: WorkItem) => {
+      if (assigneeFilter !== 'all' && item.assignee !== assigneeFilter) {
+        return false
+      }
+      if (typeFilter !== 'all' && item.type !== typeFilter) {
+        return false
+      }
+      if (!isSearchActive) {
+        return true
+      }
+      return (
+        item.title.toLowerCase().includes(term) ||
+        item.description.toLowerCase().includes(term) ||
+        item.labels.some((label) => label.toLowerCase().includes(term))
+      )
+    }
     return {
-      todo: boardData.todo.filter((item) => matchesFilters(item, term, isSearchActive)),
-      in_progress: boardData.in_progress.filter((item) => matchesFilters(item, term, isSearchActive)),
-      review: boardData.review.filter((item) => matchesFilters(item, term, isSearchActive)),
-      done: boardData.done.filter((item) => matchesFilters(item, term, isSearchActive)),
+      todo: boardData.todo.filter(matchesFilters),
+      in_progress: boardData.in_progress.filter(matchesFilters),
+      review: boardData.review.filter(matchesFilters),
+      done: boardData.done.filter(matchesFilters),
     }
   }, [assigneeFilter, boardData, search, typeFilter])
 

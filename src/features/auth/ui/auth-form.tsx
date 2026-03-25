@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { authSchema, type AuthFormValues } from '@/features/auth/model/auth-schemas'
-import { useAuth } from '@/features/auth/model/auth-context'
+import { useAuth } from '@/features/auth/model'
 import { getFirebaseErrorMessage, useI18n } from '@/shared/lib'
 
 export const AuthForm = () => {
