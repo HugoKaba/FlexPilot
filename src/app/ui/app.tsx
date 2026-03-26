@@ -48,6 +48,23 @@ const PublicRoute = ({ children }: { children: ReactNode }) => {
   return <>{children}</>
 }
 
+const protectedPages = [
+  { path: '/', element: <DashboardPage /> },
+  { path: '/dashboard', element: <DashboardPage /> },
+  { path: '/backlog', element: <BacklogPage /> },
+  { path: '/board', element: <BoardPage /> },
+  { path: '/sprints', element: <SprintsPage /> },
+  { path: '/sprints/:sprintId', element: <SprintDetailPage /> },
+  { path: '/roadmap', element: <RoadmapPage /> },
+  { path: '/reports', element: <ReportsPage /> },
+  { path: '/integrations', element: <IntegrationsPage /> },
+  { path: '/team', element: <TeamPage /> },
+  { path: '/settings', element: <SettingsPage /> },
+  { path: '/billing', element: <BillingPage /> },
+  { path: '/invite/:token', element: <InvitePage /> },
+  { path: '/work-items/:itemId', element: <WorkItemPage /> },
+] as const
+
 export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
@@ -62,147 +79,17 @@ export const App = () => {
                 </PublicRoute>
               }
             />
-
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <DashboardPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <DashboardPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/backlog"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <BacklogPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/board"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <BoardPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/sprints"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <SprintsPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/sprints/:sprintId"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <SprintDetailPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/roadmap"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <RoadmapPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/reports"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <ReportsPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/integrations"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <IntegrationsPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/team"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <TeamPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/settings"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <SettingsPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/billing"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <BillingPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/invite/:token"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <InvitePage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/work-items/:itemId"
-              element={
-                <ProtectedRoute>
-                  <AppShell>
-                    <WorkItemPage />
-                  </AppShell>
-                </ProtectedRoute>
-              }
-            />
+            {protectedPages.map((page) => (
+              <Route
+                key={page.path}
+                path={page.path}
+                element={
+                  <ProtectedRoute>
+                    <AppShell>{page.element}</AppShell>
+                  </ProtectedRoute>
+                }
+              />
+            ))}
             <Route path="*" element={<Navigate to="/auth" replace />} />
           </Routes>
         </BrowserRouter>
