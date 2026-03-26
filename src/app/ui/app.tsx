@@ -1,6 +1,6 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom'
-import type { ReactNode } from 'react'
+import { Component, Suspense, type ReactNode } from 'react'
 import { AuthProvider, useAuth } from '@/features/auth'
 import { AuthPage } from '@/pages/auth-page'
 import { BacklogPage } from '@/pages/backlog-page'
@@ -65,33 +65,63 @@ const protectedPages = [
   { path: '/work-items/:itemId', element: <WorkItemPage /> },
 ] as const
 
+class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+
+  static getDerivedStateFromError(): { hasError: boolean } {
+    return { hasError: true }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <section className="page">
+          <article className="card">
+            <h2>Une erreur est survenue</h2>
+            <p className="page-subtitle">Recharge la page ou reconnecte-toi.</p>
+          </article>
+        </section>
+      )
+    }
+
+    return this.props.children
+  }
+}
+
 export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <BrowserRouter>
-          <Routes>
-            <Route
-              path="/auth"
-              element={
-                <PublicRoute>
-                  <AuthPage />
-                </PublicRoute>
-              }
-            />
-            {protectedPages.map((page) => (
-              <Route
-                key={page.path}
-                path={page.path}
-                element={
-                  <ProtectedRoute>
-                    <AppShell>{page.element}</AppShell>
-                  </ProtectedRoute>
-                }
-              />
-            ))}
-            <Route path="*" element={<Navigate to="/auth" replace />} />
-          </Routes>
+          <AppErrorBoundary>
+            <Suspense fallback={<p className="status">Chargement des données...</p>}>
+              <Routes>
+                <Route
+                  path="/auth"
+                  element={
+                    <PublicRoute>
+                      <AuthPage />
+                    </PublicRoute>
+                  }
+                />
+                {protectedPages.map((page) => (
+                  <Route
+                    key={page.path}
+                    path={page.path}
+                    element={
+                      <ProtectedRoute>
+                        <AppShell>{page.element}</AppShell>
+                      </ProtectedRoute>
+                    }
+                  />
+                ))}
+                <Route path="*" element={<Navigate to="/auth" replace />} />
+              </Routes>
+            </Suspense>
+          </AppErrorBoundary>
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
