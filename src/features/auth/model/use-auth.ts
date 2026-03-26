@@ -1,12 +1,9 @@
-import { useContext } from 'react'
-import { AuthContext } from './auth-context-instance'
+import { login, logout, register } from './auth-actions'
+import { useAuthStore } from './auth-store'
 
 export const useAuth = () => {
-  const context = useContext(AuthContext)
+  const user = useAuthStore((state) => state.user)
+  const loading = useAuthStore((state) => state.loading)
 
-  if (!context) {
-    throw new Error('useAuth doit être utilisé dans AuthProvider')
-  }
-
-  return context
+  return { user, loading, login, register, logout }
 }
