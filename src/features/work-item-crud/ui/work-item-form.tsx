@@ -1,6 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import { workItemPayloadSchema, workItemPrioritySchema, workItemStatusSchema, workItemTypeSchema, type WorkItemPayload } from '@/entities/work-item'
+import { useI18n } from '@/shared/lib'
 import { Button, FieldInput, FieldSelect, FieldTextarea } from '@/shared/ui'
 
 interface WorkItemFormProps {
@@ -23,6 +24,7 @@ const defaultValues: WorkItemPayload = {
 }
 
 export const WorkItemForm = ({ initialValues, isSaving, onSubmit }: WorkItemFormProps) => {
+  const { t } = useI18n()
   const {
     register,
     handleSubmit,
@@ -35,20 +37,20 @@ export const WorkItemForm = ({ initialValues, isSaving, onSubmit }: WorkItemForm
   return (
     <form className="card form-grid" onSubmit={handleSubmit(onSubmit)}>
       <label className="field">
-        Titre
+        {t('title')}
         <FieldInput type="text" {...register('title')} />
         {errors.title && <span className="error">{errors.title.message}</span>}
       </label>
 
       <label className="field">
-        Description
+        {t('description')}
         <FieldTextarea rows={4} {...register('description')} />
         {errors.description && <span className="error">{errors.description.message}</span>}
       </label>
 
       <div className="grid-4">
         <label className="field">
-          Type
+          {t('type')}
           <FieldSelect {...register('type')}>
             {workItemTypeSchema.options.map((type) => (
               <option key={type} value={type}>
@@ -59,7 +61,7 @@ export const WorkItemForm = ({ initialValues, isSaving, onSubmit }: WorkItemForm
         </label>
 
         <label className="field">
-          Statut
+          {t('status')}
           <FieldSelect {...register('status')}>
             {workItemStatusSchema.options.map((status) => (
               <option key={status} value={status}>
@@ -70,7 +72,7 @@ export const WorkItemForm = ({ initialValues, isSaving, onSubmit }: WorkItemForm
         </label>
 
         <label className="field">
-          Priorité
+          {t('priority')}
           <FieldSelect {...register('priority')}>
             {workItemPrioritySchema.options.map((priority) => (
               <option key={priority} value={priority}>
@@ -81,21 +83,21 @@ export const WorkItemForm = ({ initialValues, isSaving, onSubmit }: WorkItemForm
         </label>
 
         <label className="field">
-          Estimation
+          {t('estimate')}
           <FieldInput type="number" min={0} step={1} {...register('estimate', { valueAsNumber: true })} />
           {errors.estimate && <span className="error">{errors.estimate.message}</span>}
         </label>
       </div>
 
       <label className="field">
-        Assignee
+        {t('assignee')}
         <FieldInput type="text" {...register('assignee')} />
         {errors.assignee && <span className="error">{errors.assignee.message}</span>}
       </label>
 
       <div className="actions">
         <Button tone="primary" type="submit" disabled={isSaving}>
-          {isSaving ? 'Sauvegarde...' : 'Sauvegarder'}
+          {isSaving ? t('saving') : t('save')}
         </Button>
       </div>
     </form>

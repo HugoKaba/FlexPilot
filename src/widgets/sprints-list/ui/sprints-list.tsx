@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import type { Sprint } from '@/entities/sprint'
 import { SprintCard } from '@/entities/sprint'
+import { useI18n } from '@/shared/lib'
 import { Button, EmptyState } from '@/shared/ui'
 
 export const SprintsList = ({
@@ -10,8 +11,10 @@ export const SprintsList = ({
   sprints: Sprint[]
   onDelete: (sprintId: string) => void
 }) => {
+  const { t } = useI18n()
+
   if (!sprints.length) {
-    return <EmptyState title="Aucun sprint pour le moment." />
+    return <EmptyState title={t('noSprintYet')} />
   }
 
   return (
@@ -23,10 +26,10 @@ export const SprintsList = ({
           actions={
             <div className="actions">
               <Link to={`/sprints/${sprint.id}`} className="btn btn-muted">
-                Ouvrir
+                {t('open')}
               </Link>
               <Button tone="danger" type="button" onClick={() => onDelete(sprint.id)}>
-                Supprimer
+                {t('delete')}
               </Button>
             </div>
           }

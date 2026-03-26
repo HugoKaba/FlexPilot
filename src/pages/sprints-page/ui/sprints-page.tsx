@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { useSprintsQuery } from '@/entities/sprint'
 import { useAuth } from '@/features/auth'
 import { SprintForm, useCreateSprintMutation, useDeleteSprintMutation } from '@/features/sprint-crud'
-import { getFirebaseErrorMessage } from '@/shared/lib'
+import { getFirebaseErrorMessage, useI18n } from '@/shared/lib'
 import { Button, ErrorState, LoadingState } from '@/shared/ui'
 import { SprintsList } from '@/widgets/sprints-list'
 
 export const SprintsPage = () => {
+  const { t } = useI18n()
   const { user } = useAuth()
   const sprintsQuery = useSprintsQuery(user?.uid)
 
@@ -17,23 +18,23 @@ export const SprintsPage = () => {
   const [error, setError] = useState<string | null>(null)
 
   if (sprintsQuery.isLoading) {
-    return <LoadingState text="Chargement sprints..." />
+    return <LoadingState text={t('loadingSprints')} />
   }
 
   if (sprintsQuery.isError || !sprintsQuery.data || !user) {
     const details = sprintsQuery.error ? getFirebaseErrorMessage(sprintsQuery.error) : undefined
-    return <ErrorState title="Impossible de charger les sprints." details={<p>{details}</p>} />
+    return <ErrorState title={t('sprintsLoadError')} details={<p>{details}</p>} />
   }
 
   return (
     <section className="page">
       <div className="page-head">
         <div>
-          <h1>Sprints</h1>
-          <p className="page-subtitle">Planifie et pilote les cycles de livraison.</p>
+          <h1>{t('sprintsTitle')}</h1>
+          <p className="page-subtitle">{t('sprintsSubtitle')}</p>
         </div>
         <Button tone="primary" type="button" onClick={() => setShowForm((state) => !state)}>
-          {showForm ? 'Fermer le formulaire' : 'Nouveau sprint'}
+          {showForm ? t('closeForm') : t('newSprint')}
         </Button>
       </div>
 

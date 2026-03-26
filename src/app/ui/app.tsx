@@ -18,13 +18,15 @@ import { SprintsPage } from '@/pages/sprints-page'
 import { TeamPage } from '@/pages/team-page'
 import { AppShell } from '@/widgets/app-shell'
 import { queryClient } from '@/app/providers/query-client'
+import { useI18n } from '@/shared/lib'
 import '@/app/styles/global.css'
 
 const ProtectedRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth()
+  const { t } = useI18n()
 
   if (loading) {
-    return <p className="status">Chargement de la session...</p>
+    return <p className="status">{t('sessionLoading')}</p>
   }
 
   if (!user) {
@@ -36,9 +38,10 @@ const ProtectedRoute = ({ children }: { children: ReactNode }) => {
 
 const PublicRoute = ({ children }: { children: ReactNode }) => {
   const { user, loading } = useAuth()
+  const { t } = useI18n()
 
   if (loading) {
-    return <p className="status">Chargement de la session...</p>
+    return <p className="status">{t('sessionLoading')}</p>
   }
 
   if (user) {
@@ -65,8 +68,11 @@ const protectedPages = [
   { path: '/work-items/:itemId', element: <WorkItemPage /> },
 ] as const
 
-class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
+class AppErrorBoundary extends Component<
+  { children: ReactNode; title: string; subtitle: string; retryLabel: string },
+  { hasError: boolean }
+> {
+  constructor(props: { children: ReactNode; title: string; subtitle: string; retryLabel: string }) {
     super(props)
     this.state = { hasError: false }
   }
@@ -80,8 +86,17 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
       return (
         <section className="page">
           <article className="card">
-            <h2>Une erreur est survenue</h2>
-            <p className="page-subtitle">Recharge la page ou reconnecte-toi.</p>
+            <h2>{this.props.title}</h2>
+            <p className="page-subtitle">{this.props.subtitle}</p>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={() => {
+                window.location.reload()
+              }}
+            >
+              {this.props.retryLabel}
+            </button>
           </article>
         </section>
       )
@@ -91,38 +106,46 @@ class AppErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
   }
 }
 
+const AppRouter = () => {
+  const { t } = useI18n()
+
+  return (
+    <BrowserRouter>
+      <AppErrorBoundary title={t('appErrorTitle')} subtitle={t('appErrorSubtitle')} retryLabel={t('retry')}>
+        <Suspense fallback={<p className="status">{t('dataLoading')}</p>}>
+          <Routes>
+            <Route
+              path="/auth"
+              element={
+                <PublicRoute>
+                  <AuthPage />
+                </PublicRoute>
+              }
+            />
+            {protectedPages.map((page) => (
+              <Route
+                key={page.path}
+                path={page.path}
+                element={
+                  <ProtectedRoute>
+                    <AppShell>{page.element}</AppShell>
+                  </ProtectedRoute>
+                }
+              />
+            ))}
+            <Route path="*" element={<Navigate to="/auth" replace />} />
+          </Routes>
+        </Suspense>
+      </AppErrorBoundary>
+    </BrowserRouter>
+  )
+}
+
 export const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <BrowserRouter>
-          <AppErrorBoundary>
-            <Suspense fallback={<p className="status">Chargement des données...</p>}>
-              <Routes>
-                <Route
-                  path="/auth"
-                  element={
-                    <PublicRoute>
-                      <AuthPage />
-                    </PublicRoute>
-                  }
-                />
-                {protectedPages.map((page) => (
-                  <Route
-                    key={page.path}
-                    path={page.path}
-                    element={
-                      <ProtectedRoute>
-                        <AppShell>{page.element}</AppShell>
-                      </ProtectedRoute>
-                    }
-                  />
-                ))}
-                <Route path="*" element={<Navigate to="/auth" replace />} />
-              </Routes>
-            </Suspense>
-          </AppErrorBoundary>
-        </BrowserRouter>
+        <AppRouter />
       </AuthProvider>
     </QueryClientProvider>
   )

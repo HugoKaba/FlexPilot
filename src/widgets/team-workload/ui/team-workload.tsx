@@ -1,7 +1,9 @@
 import type { WorkItem } from '@/entities/work-item'
+import { useI18n } from '@/shared/lib'
 import { Card } from '@/shared/ui'
 
 export const TeamWorkload = ({ items }: { items: WorkItem[] }) => {
+  const { t } = useI18n()
   const workload = items.reduce<Record<string, { total: number; done: number }>>((acc, item) => {
     if (!acc[item.assignee]) {
       acc[item.assignee] = { total: 0, done: 0 }
@@ -18,7 +20,7 @@ export const TeamWorkload = ({ items }: { items: WorkItem[] }) => {
   const members = Object.entries(workload)
 
   if (!members.length) {
-    return <Card>Aucun assignee pour le moment.</Card>
+    return <Card>{t('noAssigneeYet')}</Card>
   }
 
   return (
@@ -26,7 +28,7 @@ export const TeamWorkload = ({ items }: { items: WorkItem[] }) => {
       {members.map(([assignee, stats]) => (
         <Card key={assignee} className="metric-card">
           <h2>{assignee}</h2>
-          <p>{stats.done}/{stats.total} items terminés</p>
+          <p>{stats.done}/{stats.total} {t('itemsDone')}</p>
           <div className="progress-track">
             <div className="progress-fill" style={{ width: `${Math.round((stats.done / stats.total) * 100)}%` }} />
           </div>

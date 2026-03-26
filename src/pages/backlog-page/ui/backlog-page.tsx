@@ -5,7 +5,7 @@ import { useWorkItemsQuery, WorkItemDrawer, type WorkItem, type WorkItemPayload 
 import { useAuth } from '@/features/auth'
 import { WorkItemFiltersPanel, workItemFiltersSchema, type WorkItemFilters } from '@/features/work-item-filters'
 import { WorkItemForm, useCreateWorkItemMutation, useDeleteWorkItemMutation, useMoveWorkItemRankMutation, useUpdateWorkItemMutation } from '@/features/work-item-crud'
-import { getFirebaseErrorMessage } from '@/shared/lib'
+import { getFirebaseErrorMessage, useI18n } from '@/shared/lib'
 import { Button, Card, ErrorState, LoadingState } from '@/shared/ui'
 import { BacklogList } from '@/widgets/backlog-list'
 
@@ -34,6 +34,7 @@ const toPayload = (item: WorkItem): WorkItemPayload => ({
 })
 
 export const BacklogPage = () => {
+  const { t } = useI18n()
   const { user } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
 
@@ -70,7 +71,7 @@ export const BacklogPage = () => {
   }, [filters, itemsQuery.data])
 
   if (itemsQuery.isLoading || sprintsQuery.isLoading) {
-    return <LoadingState text="Chargement backlog..." />
+    return <LoadingState text={t('loadingBacklog')} />
   }
 
   if (itemsQuery.isError || sprintsQuery.isError || !user || !itemsQuery.data || !sprintsQuery.data) {
@@ -78,12 +79,12 @@ export const BacklogPage = () => {
 
     return (
       <ErrorState
-        title="Impossible de charger le backlog."
+        title={t('backlogLoadError')}
         details={
           <>
             <p>{details}</p>
             <a href="https://console.firebase.google.com/project/archi-front/firestore/indexes" target="_blank" rel="noreferrer">
-              Créer les index Firestore
+              {t('createFirestoreIndexes')}
             </a>
           </>
         }
@@ -95,8 +96,8 @@ export const BacklogPage = () => {
     <section className="page">
       <div className="page-head">
         <div>
-          <h1>Backlog</h1>
-          <p className="page-subtitle">Priorise, édite et structure tes work items.</p>
+          <h1>{t('backlogTitle')}</h1>
+          <p className="page-subtitle">{t('backlogSubtitle')}</p>
         </div>
         <Button
           tone="primary"
@@ -107,7 +108,7 @@ export const BacklogPage = () => {
             setFormVisible((current) => !current)
           }}
         >
-          {formVisible ? 'Fermer le formulaire' : 'Nouveau work item'}
+          {formVisible ? t('closeForm') : t('newWorkItem')}
         </Button>
       </div>
 

@@ -4,9 +4,11 @@ import { useSprintQuery, useSprintsQuery } from '@/entities/sprint'
 import { useWorkItemsQuery } from '@/entities/work-item'
 import { useAssignWorkItemSprintMutation } from '@/features/board-actions'
 import { useAuth } from '@/features/auth'
+import { useI18n } from '@/shared/lib'
 import { Button, Card, ErrorState, LoadingState } from '@/shared/ui'
 
 export const SprintDetailPage = () => {
+  const { t } = useI18n()
   const { sprintId } = useParams<{ sprintId: string }>()
   const { user } = useAuth()
 
@@ -36,11 +38,11 @@ export const SprintDetailPage = () => {
   }, [itemsQuery.data, sprintQuery.data])
 
   if (sprintQuery.isLoading || itemsQuery.isLoading || sprintsQuery.isLoading) {
-    return <LoadingState text="Chargement sprint..." />
+    return <LoadingState text={t('loadingSprint')} />
   }
 
   if (!sprintId || sprintQuery.isError || itemsQuery.isError || !sprintQuery.data || !itemsQuery.data || !sprintsQuery.data) {
-    return <ErrorState title="Impossible de charger le détail sprint." />
+    return <ErrorState title={t('sprintDetailLoadError')} />
   }
 
   const sprint = sprintQuery.data
@@ -51,39 +53,39 @@ export const SprintDetailPage = () => {
       <div className="page-head">
         <div>
           <h1>{sprint.name}</h1>
-          <p className="page-subtitle">Objectif: {sprint.goal}</p>
+          <p className="page-subtitle">{t('sprintGoal')}: {sprint.goal}</p>
         </div>
       </div>
 
       <Card className="kpi-card">
-        <h2>Progression sprint</h2>
+        <h2>{t('sprintProgress')}</h2>
         <p>
-          Progression items: {stats?.done ?? 0}/{stats?.total ?? 0}
+          {t('itemProgress')}: {stats?.done ?? 0}/{stats?.total ?? 0}
         </p>
         <p>
-          Progression points: {stats?.donePoints ?? 0}/{stats?.totalPoints ?? 0}
+          {t('pointsProgress')}: {stats?.donePoints ?? 0}/{stats?.totalPoints ?? 0}
         </p>
       </Card>
 
       <Card>
-        <h2>Items du sprint</h2>
+        <h2>{t('sprintItems')}</h2>
         {(stats?.sprintItems ?? []).map((item) => (
           <div key={item.id} className="inline-row">
             <span>{item.title}</span>
             <Button type="button" tone="muted" onClick={() => void assignMutation.mutateAsync({ itemId: item.id, sprintId: null })}>
-              Retirer
+              {t('remove')}
             </Button>
           </div>
         ))}
       </Card>
 
       <Card>
-        <h2>Backlog disponible</h2>
+        <h2>{t('backlogAvailable')}</h2>
         {backlogItems.map((item) => (
           <div key={item.id} className="inline-row">
             <span>{item.title}</span>
             <Button type="button" tone="primary" onClick={() => void assignMutation.mutateAsync({ itemId: item.id, sprintId: sprint.id })}>
-              Ajouter
+              {t('add')}
             </Button>
           </div>
         ))}

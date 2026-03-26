@@ -1,15 +1,16 @@
 import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { useAuth } from '@/features/auth'
+import { useI18n } from '@/shared/lib'
 import { usePreferencesStore } from '@/shared/model'
 import { Card } from '@/shared/ui'
 
 export const BillingPage = () => {
+  const { t } = useI18n()
   const { user } = useAuth()
   const [searchParams] = useSearchParams()
   const subscriptionPlan = usePreferencesStore((state) => state.subscriptionPlan)
   const subscriptionStatus = usePreferencesStore((state) => state.subscriptionStatus)
-  const setSubscriptionPlan = usePreferencesStore((state) => state.setSubscriptionPlan)
   const setSubscriptionStatus = usePreferencesStore((state) => state.setSubscriptionStatus)
 
   useEffect(() => {
@@ -17,43 +18,43 @@ export const BillingPage = () => {
     if (checkout === 'cancelled' && subscriptionStatus !== 'active') {
       setSubscriptionStatus('inactive')
     }
-  }, [searchParams, setSubscriptionPlan, setSubscriptionStatus, subscriptionStatus])
+  }, [searchParams, setSubscriptionStatus, subscriptionStatus])
 
   return (
     <section className="page">
       <div className="page-head">
-        <h1>Billing & Abonnement</h1>
-        <p className="page-subtitle">Informations d’abonnement et statut de facturation.</p>
+        <h1>{t('billingTitle')}</h1>
+        <p className="page-subtitle">{t('billingSubtitle')}</p>
       </div>
 
       <Card className="billing-status">
         <p>
-          Plan actuel: <strong>{subscriptionPlan}</strong>
+          {t('currentPlan')}: <strong>{subscriptionPlan}</strong>
         </p>
         <p>
-          Statut: <strong>{subscriptionStatus}</strong>
+          {t('billingStatus')}: <strong>{subscriptionStatus}</strong>
         </p>
       </Card>
 
       <Card className="billing-test-cards">
-        <h2>Plan actif</h2>
+        <h2>{t('activePlan')}</h2>
         <ul className="billing-list">
-          <li>Nom: FlexPilot SaaS</li>
-          <li>Type: Abonnement mensuel</li>
+          <li>{t('planName')}: FlexPilot SaaS</li>
+          <li>{t('type')}: {t('monthlySubscription')}</li>
           <li>Prix: 25€ / mois</li>
-          <li>Compte: {user?.email ?? 'inconnu'}</li>
+          <li>{t('account')}: {user?.email ?? t('unknown')}</li>
         </ul>
       </Card>
 
       <Card className="billing-test-cards">
-        <h2>Stripe Test Mode (cartes)</h2>
-        <p className="page-subtitle">Le paiement se fait via la pop-in après connexion/inscription.</p>
+        <h2>{t('stripeTestMode')}</h2>
+        <p className="page-subtitle">{t('paywallCheckoutHint')}</p>
         <ul className="billing-list">
-          <li>Succès paiement: 4242 4242 4242 4242</li>
-          <li>Carte refusée: 4000 0000 0000 0002</li>
-          <li>Authentification 3D Secure: 4000 0025 0000 3155</li>
+          <li>{t('testCardSuccess')}: 4242 4242 4242 4242</li>
+          <li>{t('testCardDeclined')}: 4000 0000 0000 0002</li>
+          <li>{t('testCard3ds')}: 4000 0025 0000 3155</li>
         </ul>
-        <p className="page-subtitle">Date: future, CVC: 3 chiffres, code postal: valide.</p>
+        <p className="page-subtitle">{t('testCardMeta')}</p>
       </Card>
     </section>
   )

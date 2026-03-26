@@ -7,6 +7,7 @@ import {
   type WorkItem,
   type WorkItemPayload,
 } from '@/entities/work-item/model/work-item-schemas'
+import { useI18n } from '@/shared/lib'
 import { Badge, Button } from '@/shared/ui'
 
 export const WorkItemDrawer = ({
@@ -18,6 +19,7 @@ export const WorkItemDrawer = ({
   onClose: () => void
   onSave?: (itemId: string, payload: WorkItemPayload) => Promise<void>
 }) => {
+  const { t, language } = useI18n()
   const buildFormState = (value: WorkItem | null): WorkItemPayload => ({
     title: value?.title ?? '',
     description: value?.description ?? '',
@@ -60,19 +62,19 @@ export const WorkItemDrawer = ({
             <p className="page-subtitle">#{item.id.slice(0, 8)} · {item.type}</p>
           </div>
           <Button type="button" tone="muted" onClick={onClose}>
-            Fermer
+            {t('close')}
           </Button>
         </div>
 
         <div className="drawer-tabs">
           <button className={`drawer-tab ${tab === 'details' ? 'active' : ''}`} type="button" onClick={() => setTab('details')}>
-            Détails
+            {t('details')}
           </button>
           <button className={`drawer-tab ${tab === 'edit' ? 'active' : ''}`} type="button" onClick={() => setTab('edit')}>
-            Édition
+            {t('editing')}
           </button>
           <button className={`drawer-tab ${tab === 'activity' ? 'active' : ''}`} type="button" onClick={() => setTab('activity')}>
-            Activité
+            {t('activity')}
           </button>
         </div>
 
@@ -88,7 +90,7 @@ export const WorkItemDrawer = ({
             <p>{item.description}</p>
             <div className="actions">
               <Link to={`/work-items/${item.id}`} className="btn btn-primary" onClick={onClose}>
-                Ouvrir fiche complète
+                {t('fullWorkItemSheet')}
               </Link>
             </div>
           </>
@@ -101,7 +103,7 @@ export const WorkItemDrawer = ({
               event.preventDefault()
               setError(null)
               if (!onSave) {
-                setError('Édition non disponible depuis cette vue.')
+                setError(t('editUnavailableFromView'))
                 return
               }
 
@@ -117,18 +119,18 @@ export const WorkItemDrawer = ({
                 await onSave(item.id, nextPayload)
                 onClose()
               } catch {
-                setError('Impossible de sauvegarder la tâche.')
+                setError(t('workItemSaveError'))
               } finally {
                 setSaving(false)
               }
             }}
           >
             <label className="field">
-              Titre
+              {t('title')}
               <input value={formState.title} onChange={(event) => setFormState((prev) => ({ ...prev, title: event.target.value }))} />
             </label>
             <label className="field">
-              Description
+              {t('description')}
               <textarea
                 rows={4}
                 value={formState.description}
@@ -137,7 +139,7 @@ export const WorkItemDrawer = ({
             </label>
             <div className="grid-2">
               <label className="field">
-                Type
+                {t('type')}
                 <select
                   value={formState.type}
                   onChange={(event) => setFormState((prev) => ({ ...prev, type: event.target.value as WorkItemPayload['type'] }))}
@@ -150,7 +152,7 @@ export const WorkItemDrawer = ({
                 </select>
               </label>
               <label className="field">
-                Statut
+                {t('status')}
                 <select
                   value={formState.status}
                   onChange={(event) => setFormState((prev) => ({ ...prev, status: event.target.value as WorkItemPayload['status'] }))}
@@ -163,7 +165,7 @@ export const WorkItemDrawer = ({
                 </select>
               </label>
               <label className="field">
-                Priorité
+                {t('priority')}
                 <select
                   value={formState.priority}
                   onChange={(event) => setFormState((prev) => ({ ...prev, priority: event.target.value as WorkItemPayload['priority'] }))}
@@ -176,7 +178,7 @@ export const WorkItemDrawer = ({
                 </select>
               </label>
               <label className="field">
-                Points
+                {t('points')}
                 <input
                   type="number"
                   min={0}
@@ -191,18 +193,18 @@ export const WorkItemDrawer = ({
                 />
               </label>
               <label className="field">
-                Assignee
+                {t('assignee')}
                 <input value={formState.assignee} onChange={(event) => setFormState((prev) => ({ ...prev, assignee: event.target.value }))} />
               </label>
               <label className="field">
-                Labels (séparés par virgule)
+                {t('labelsCommaSeparated')}
                 <input value={labelsText} onChange={(event) => setLabelsText(event.target.value)} />
               </label>
             </div>
             {error ? <p className="error">{error}</p> : null}
             <div className="actions">
               <Button type="submit" tone="primary" disabled={saving}>
-                {saving ? 'Sauvegarde...' : 'Enregistrer'}
+                {saving ? t('saving') : t('saveChanges')}
               </Button>
             </div>
           </form>
@@ -211,16 +213,16 @@ export const WorkItemDrawer = ({
         {tab === 'activity' ? (
           <div className="drawer-activity">
             <article className="activity-item">
-              <strong>Création</strong>
-              <p className="page-subtitle">{new Date(item.createdAt).toLocaleString()}</p>
+              <strong>{t('createdAt')}</strong>
+              <p className="page-subtitle">{new Date(item.createdAt).toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US')}</p>
             </article>
             <article className="activity-item">
-              <strong>Dernière mise à jour</strong>
-              <p className="page-subtitle">{new Date(item.updatedAt).toLocaleString()}</p>
+              <strong>{t('updatedAt')}</strong>
+              <p className="page-subtitle">{new Date(item.updatedAt).toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US')}</p>
             </article>
             <article className="activity-item">
-              <strong>Workflow</strong>
-              <p className="page-subtitle">Statut courant: {item.status}</p>
+              <strong>{t('workflow')}</strong>
+              <p className="page-subtitle">{t('currentStatus')}: {item.status}</p>
             </article>
           </div>
         ) : null}

@@ -3,10 +3,11 @@ import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useWorkItemQuery, useWorkItemsQuery, type WorkItem } from '@/entities/work-item'
 import { WorkItemForm, useDeleteWorkItemMutation, useUpdateWorkItemMutation } from '@/features/work-item-crud'
 import { useAuth } from '@/features/auth'
-import { getFirebaseErrorMessage } from '@/shared/lib'
+import { getFirebaseErrorMessage, useI18n } from '@/shared/lib'
 import { Badge, Button, Card, ErrorState, LoadingState } from '@/shared/ui'
 
 export const WorkItemPage = () => {
+  const { t, language } = useI18n()
   const { itemId } = useParams<{ itemId: string }>()
   const [searchParams] = useSearchParams()
   const { user } = useAuth()
@@ -30,16 +31,16 @@ export const WorkItemPage = () => {
   }, [allItemsQuery.data, itemQuery.data])
 
   if (!itemId) {
-    return <ErrorState title="Identifiant de tâche manquant." />
+    return <ErrorState title={t('missingWorkItemId')} />
   }
 
   if (itemQuery.isLoading || allItemsQuery.isLoading) {
-    return <LoadingState text="Chargement de la tâche..." />
+    return <LoadingState text={t('loadingWorkItem')} />
   }
 
   if (itemQuery.isError || allItemsQuery.isError || !itemQuery.data || !allItemsQuery.data) {
     const details = itemQuery.error ? getFirebaseErrorMessage(itemQuery.error) : undefined
-    return <ErrorState title="Impossible de charger la tâche." details={details} />
+    return <ErrorState title={t('workItemLoadError')} details={details} />
   }
 
   const item = itemQuery.data
@@ -50,11 +51,11 @@ export const WorkItemPage = () => {
       <div className="page-head">
         <div>
           <h1>{item.title}</h1>
-          <p className="page-subtitle">Détail complet de la tâche et actions de delivery.</p>
+          <p className="page-subtitle">{t('workItemDetailSubtitle')}</p>
         </div>
         <div className="actions">
           <Button type="button" tone="muted" onClick={() => setEditing((state) => !state)}>
-            {editing ? 'Fermer édition' : 'Éditer'}
+            {editing ? t('closeEdit') : t('edit')}
           </Button>
           <Button
             type="button"
@@ -65,7 +66,7 @@ export const WorkItemPage = () => {
               navigate('/backlog')
             }}
           >
-            {deleteMutation.isPending ? 'Suppression...' : 'Supprimer'}
+            {deleteMutation.isPending ? t('deleting') : t('delete')}
           </Button>
         </div>
       </div>
@@ -106,19 +107,19 @@ export const WorkItemPage = () => {
 
       <section className="grid-2">
         <Card className="enterprise-card">
-          <h2>Hiérarchie</h2>
-          <p className="page-subtitle">Parent: {related.parent ? related.parent.title : 'Aucun parent'}</p>
-          {related.parent ? <Link to={`/work-items/${related.parent.id}`} className="btn btn-muted">Ouvrir parent</Link> : null}
+          <h2>{t('hierarchy')}</h2>
+          <p className="page-subtitle">{t('parent')}: {related.parent ? related.parent.title : t('noParent')}</p>
+          {related.parent ? <Link to={`/work-items/${related.parent.id}`} className="btn btn-muted">{t('openParent')}</Link> : null}
 
-          <h3>Enfants</h3>
+          <h3>{t('children')}</h3>
           <div className="enterprise-list">
             {children.length === 0 ? (
-              <p className="page-subtitle">Aucune sous-tâche liée.</p>
+              <p className="page-subtitle">{t('noChild')}</p>
             ) : (
               children.map((child) => (
                 <article key={child.id} className="enterprise-item enterprise-row">
                   <p><strong>{child.title}</strong></p>
-                  <Link to={`/work-items/${child.id}`} className="btn btn-muted">Ouvrir</Link>
+                  <Link to={`/work-items/${child.id}`} className="btn btn-muted">{t('open')}</Link>
                 </article>
               ))
             )}
@@ -126,18 +127,18 @@ export const WorkItemPage = () => {
         </Card>
 
         <Card className="enterprise-card">
-          <h2>Activité</h2>
+          <h2>{t('activity')}</h2>
           <div className="enterprise-list">
             <article className="enterprise-item">
-              <p><strong>Création</strong></p>
-              <p className="page-subtitle">{new Date(item.createdAt).toLocaleString('fr-FR')}</p>
+              <p><strong>{t('createdAt')}</strong></p>
+              <p className="page-subtitle">{new Date(item.createdAt).toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US')}</p>
             </article>
             <article className="enterprise-item">
-              <p><strong>Dernière mise à jour</strong></p>
-              <p className="page-subtitle">{new Date(item.updatedAt).toLocaleString('fr-FR')}</p>
+              <p><strong>{t('updatedAt')}</strong></p>
+              <p className="page-subtitle">{new Date(item.updatedAt).toLocaleString(language === 'fr' ? 'fr-FR' : 'en-US')}</p>
             </article>
             <article className="enterprise-item">
-              <p><strong>Cycle status</strong></p>
+              <p><strong>{t('cycleStatus')}</strong></p>
               <p className="page-subtitle">{item.status}</p>
             </article>
           </div>

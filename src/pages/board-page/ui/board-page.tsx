@@ -95,7 +95,7 @@ export const BoardPage = () => {
       <div className="card target-board-toolbar">
         <label className="field">
           {t('search')}
-          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Titre, description, label..." />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder={t('boardSearchPlaceholder')} />
         </label>
         <label className="field">
           {t('assignee')}

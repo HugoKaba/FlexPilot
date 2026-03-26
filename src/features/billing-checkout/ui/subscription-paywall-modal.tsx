@@ -1,6 +1,7 @@
 import { loadStripe, type StripeEmbeddedCheckout } from '@stripe/stripe-js'
 import { useEffect, useRef, useState } from 'react'
 import { createEmbeddedCheckoutSession } from '@/features/billing-checkout/api/subscription-service'
+import { useI18n } from '@/shared/lib'
 
 interface SubscriptionPaywallModalProps {
   open: boolean
@@ -10,6 +11,7 @@ interface SubscriptionPaywallModalProps {
 }
 
 export const SubscriptionPaywallModal = ({ open, userId, userEmail, onActivateSubscription }: SubscriptionPaywallModalProps) => {
+  const { t } = useI18n()
   const mountRef = useRef<HTMLDivElement | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -22,7 +24,7 @@ export const SubscriptionPaywallModal = ({ open, userId, userEmail, onActivateSu
     const publishableKey = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY
 
     if (!publishableKey) {
-      setErrorMessage('VITE_STRIPE_PUBLISHABLE_KEY manquant.')
+      setErrorMessage(t('missingStripePublishableKey'))
       return
     }
 
@@ -37,7 +39,7 @@ export const SubscriptionPaywallModal = ({ open, userId, userEmail, onActivateSu
         const stripe = await loadStripe(publishableKey)
 
         if (!stripe) {
-          throw new Error('Impossible d’initialiser Stripe SDK.')
+          throw new Error(t('stripeSdkInitError'))
         }
 
         checkoutInstance = await stripe.initEmbeddedCheckout({
@@ -57,7 +59,7 @@ export const SubscriptionPaywallModal = ({ open, userId, userEmail, onActivateSu
           checkoutInstance.mount(mountRef.current)
         }
       } catch (error: unknown) {
-        setErrorMessage(error instanceof Error ? error.message : 'Impossible de lancer le paiement.')
+        setErrorMessage(error instanceof Error ? error.message : t('stripeCheckoutStartError'))
       } finally {
         setLoading(false)
       }
@@ -69,7 +71,7 @@ export const SubscriptionPaywallModal = ({ open, userId, userEmail, onActivateSu
       destroyed = true
       checkoutInstance?.destroy()
     }
-  }, [onActivateSubscription, open, userEmail, userId])
+  }, [onActivateSubscription, open, t, userEmail, userId])
 
   if (!open) {
     return null
@@ -78,14 +80,14 @@ export const SubscriptionPaywallModal = ({ open, userId, userEmail, onActivateSu
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
       <div className="card modal-card">
-        <h2 id="paywall-title">Abonnement requis</h2>
-        <p className="page-subtitle">Active l’abonnement 25€ / mois directement ici.</p>
+        <h2 id="paywall-title">{t('subscriptionRequired')}</h2>
+        <p className="page-subtitle">{t('activateSubscriptionInline')}</p>
 
         <div ref={mountRef} className="embedded-checkout-slot" />
-        {loading ? <p className="page-subtitle">Chargement du formulaire Stripe...</p> : null}
+        {loading ? <p className="page-subtitle">{t('loadingStripeForm')}</p> : null}
         {errorMessage ? <p className="error">{errorMessage}</p> : null}
 
-        <p className="page-subtitle">Cartes test: 4242 4242 4242 4242, date future, CVC 123.</p>
+        <p className="page-subtitle">{t('stripeTestCardsHint')}</p>
       </div>
     </div>
   )
